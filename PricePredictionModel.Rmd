@@ -1,0 +1,522 @@
+---
+title: "Final Report C2"
+output: 
+  pdf_document:
+    toc: no
+geometry:
+- top = 0.5in
+- bottom = 0.5in
+- left = 0.5in
+- right = 0.5in
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(gtsummary)
+library(lubridate)
+library(ggforce)
+library(tidyr)
+library(gridExtra)
+```
+
+# Analysis of BMW Auction Prices: Impacts of Mileage, Car Type, and Key Features
+
+**Team members (Lab C2):** Ananya Agarwal, Sumanth Hosdurg Kamath, Sangwoo (Mark) Kim, Thi Phuong Thao Vu, Zhanbo Yang, Runqi Zhao
+
+
+## Abstract  
+
+This report explores the factors that affect prices at BMW car auctions using statistical modeling. Utilizing a data set containing 4,843 entries of BMWs over five years, we investigated how mileage, car type, and features impact prices. Linear regression, data transformation, and model refinement techniques were employed for this analysis to understand the relationship between these variables and auction prices. Initial results showed significant price variations based on car type, with coupes and SUVs commanding higher prices than convertibles. Mileage negatively impacted prices, with transformations enhancing model reliability. Additionally, including engine power in models increased their explanatory power from 42.42% to 53.1%. This study provides valuable insights for stakeholders in the automotive market, aiding price-setting strategies and informed purchasing decisions.
+
+
+## Introduction  
+
+Understanding the factors influencing car prices in the secondary market is essential for automotive stakeholders: including auction platforms, dealers, or consumers. This report will examine how mileage, car type, and key features impact BMW auction prices. Our main goal is to answer how much these factors collectively contribute to price variability and provide predictive models for price-setting and strategic buying. Specifically, we analyze: 1) The effect of car type on auction price. 2) The impact of mileage on price, considering car age. 3) The influence of specific features on price predictions.  
+
+By using linear regression models and enhancing them with data transformation and relevant variables, we will aim to create robust models with which price dynamics can be interpreted, strategic decisions guided, and the understanding of the automotive resale market increased.
+
+## Data  
+The dataset for this project includes essential variables characterizing BMW cars, such as mileage, engine_power, fuel type, paint_color, and car_type. It also contains boolean features (feature_1 to feature_8) that denote specific attributes, alongside sales information like car price and model_key. To provide additional insights, we created Car_Age, a new variable measuring the vehicle’s age in years, calculated from the registration date to the sale date.  
+
+We improved data quality by filtering out implausible values, specifically records with negative or excessively high mileage (over 1,000,000 miles) and engine power less than or equal to zero. We further streamlined the data by removing redundant columns like registration_date and sold_at.   
+
+Furthermore, we categorized infrequent car models under "other models" and grouped less common car types into "other car types" based on frequency thresholds, simplifying the analysis while retaining meaningful information. (Table A1)
+
+## Explain the model for each variable
+
+In Figure A1, the scatter plot shows square root-transformed car prices grouped by different car types, illustrating variations in price distribution across categories. SUVs and sedans generally have a wider spread and higher prices compared to other car types.
+
+Figure A2 displays a scatter plot of mileage versus price, revealing a right-skewed distribution that necessitated square root transformations to normalize these variables. As a result, we applied square root transformations to both price and mileage to address this skewness.
+
+In Figure A3, the scatter plot demonstrates a negative correlation between car age and the square root-transformed price, indicating that car prices decrease as vehicles age. This trend reflects depreciation over time, with older cars typically having lower prices, though significant variation exists among cars of the same age, suggesting other factors also play a role.
+
+Figure A4 highlights feature patterns within the dataset, showing considerable variation in the presence of specific features among BMW cars. Common features like feature_1 and feature_7 may be standard or highly desirable, while less common features are likely exclusive to high-end models or optional packages, reflecting differences in car configurations and consumer preferences.
+
+Lastly, Figure A5 reveals a positive relationship between engine power and the square root-transformed price, with higher engine power generally associated with higher car prices. However, the spread of data indicates that other factors also influence vehicle pricing.
+
+
+## Modeling and Analysis: 
+
+### Stepwise Model  
+
+The variable paint color was dropped during stepwise regression due to its limited statistical significance and negligible contribution to model performance. While included, paint_color yielded high p-values for most levels, indicating weak relationships with the dependent variable, price_sqrt. Additionally, its inclusion resulted in an AIC value of 13252, which improved to 13242 upon removal. This signifies a more parsimonious model with better overall fit. Given that the primary focus was on predictors with substantial explanatory power, such as mileage and car type, retaining paint_color would have unnecessarily increased model complexity.
+
+### Model Notation:
+$$\sqrt{price} = \beta_0 + \beta_1\sqrt{mileage} + \beta_2\ Car Age + \beta_3\ Car\ type_{Sedan} + \beta_4\ Car\ type_{SUV} + \beta_5\ Car\ type_{Other Car types} + $$  
+
+$$\beta_6\ Feature1 + \beta_7\ Feature2 + \beta_8\ Feature3 + \beta_9\ Feature4 + \beta_{10}\ Feature5 + \beta_{11}\ Feature6 + \beta_{12}\ Feature7 + $$  
+
+
+$$\beta_{13}\ Feature8 + \beta_{14}\ engine\ power + \beta_{15}\ Fuel_{electro} + \beta_{16}\ Fuel_{hybrid\ petrol} + \beta_{17}\ Fuel_{petrol} + \beta_{18}\ Model\ Key_{118} + $$  
+
+$$\beta_{19}\ Model\ Key_{316} + \beta_{20}\ Model\ Key_{318} + \beta_{21}\ Model\ Key_{320} + \beta_{22}\ Model\ Key_{520} + \beta_{23}\ Model\ Key_{525} + $$
+
+
+$$\beta_{24}\ Model\ Key_{530} + \beta_{25}\ Model\ Key_{X1} + \beta_{26}\ Model\ Key_{X3} + \beta_{27}\ Model\ Key_{X5} + \beta_{28}\ Model\ Key_{Other Models} + \epsilon$$
+
+### Modeling and Analysis:   
+
+**Interpretation for Stepwise Regression model**
+Based Figure B1, on the residuals vs. fitted values plots, the residuals do not exhibit a clear pattern, with most points evenly scattered around the zero-mean line along the fitted values. In Figure B3, the square rooted standardized residual versus fitted value plot shows a slightly noticeable trend of residuals spanning out. In both of the plots, only a few points show large residuals compared to the majority. This suggests that the residual variance is generally constant, indicating that our model satisfies the assumption of homoscedasticity.
+
+According to Figure B2, the normal Q-Q plot, our standardized residuals deviated from the 45 degree line at both ends of the quantiles. Specifically, the points deviate from the target line left of -2 theoretical quantiles and right of 2.5 theoretical quantiles. This means that our model does not satisfy the assumption of residuals being normally distributed very well. 
+
+Given Figure B4 the residuals versus the leverage plot, we can see that Cook’s distance line has marked out no data point. Only 3 points have notably high standard residuals with zero to tiny leverage; 2 points have notably high leverages but very small standard residual values. In conclusion, no points exerting concerns of being outliers.
+
+The residual standard error of our final model is 15.11 on 2404 degrees of freedom.  
+
+The multiple $R^2$ of the final model is 0.8027. The adjusted $R^2$ of the model is very close value of 0.8004. This means 80.27% of the variation in our data set is explained by our final model based on the multiple $R^2$, and 80.04% of the variation in our data set is explained by our final model based on the Adjusted $R^2$. Our model is a complex model with multiple variables, so the adjusted R-squared is a better indicator of model performance as it penalize complexity. Even so, our model has a very high coefficient of determination at 80%, which is a considered to be very good in general.
+
+The F-test score is 349.4 on 28 and 2404 Degree of Freedom, which translates to a p-value less than 2.2 * 10^-16. We reject the null hypothesis of the F-test, meaning that at least one predictor significantly contribute to the explaining of variation in squared root of car price. 
+
+No predictors have adjusted variance inflation factors exceeding the commonly used thresholds of 5 or 10 (Highest for car type is 1.78). So we believe that multicollinearity is not an significant issue in this model. All predictors are within acceptable ranges after adjusting for degrees of freedom.
+
+**Interpretation for Lasso regression model**
+The LASSO regression model retained most key predictors, such as mileage, car age, car type, features, engine power, and fuel types, while shrinking the coefficients of less important variables. However, it did not substantially reduce the number of variables, as most predictors remained with non-zero coefficients even at the optimal $\lambda$. This suggests that the dataset's structure and the relevance of predictors limited LASSO's ability to eliminate variables effectively.
+
+**Compare Stepwise Regression and Lasso regression**
+The LASSO regression model did not significantly reduce the number of variables compared to the stepwise regression model, as both retained most key predictors, including mileage, car age, car type, features, engine power, and fuel types. While LASSO can shrink less important coefficients to zero, in this dataset, it primarily affected coefficient magnitudes without eliminating many variables. The stepwise regression model, guided by statistical criteria like AIC, had already excluded non-significant variables (e.g., paint color), achieving a similar predictive performance with an adjusted $R^2$ of 80%. Given this, LASSO did not simplify the model further or provide a notable advantage in prediction, likely due to the dataset’s structure and the importance of most predictors.
+
+### Q1: How does car type impact auction price
+
+In this model we reduced the car types from 8 to 4 types (Estate, SUV, Sedan and Other car type) based on the popularity of the car type.  
+
+From the visualization in the Training dataset (Figure A1), we can find the lowest average of 111 of the square root of the price from the estate, and the highest averaged square root of price of 142 from the SUV.   
+
+From the multivariable model fitted from the training dataset, car type showed a significant effect on the square root of price. Compared to the estate, the SUV has an average 33.4 increase in the square root of price, while the sedan only has an average increase of 9.6, and 7.11 for other car types. This indicates that, in the prediction of the car price, the car type is important, and considering all other situations (mileage, car age, features, etc) at the same level, the square root of the final price would be highest for SUV, and lowest for estate, and SUV would have an average 33.4 higher of the square root of price than estate.  
+
+From the stepwise model, we can find the car type played an important role in predicting the square root of price. Compared with the full model, if we remove the variable of reduced car type, the AIC would increase. The both side stepwise model suggests the removal the variable of paint color, which could decrease the AIC compared to the full model. And in this reduced model, we still have the car type as an important variable to include, which if we removed from the model, would still increase the AIC.   
+
+The final model after the stepwise selection still give high importance to the car type, but the effect size has changed. Compared to the estate, the SUV has an average 33.5 increase in the square root of price, while the sedan only has an average increase of 9.6, and 7.2 for other car types. This indicates that, the car type is still important in the prediction of car price from the reduced model. Considering all other situations (mileage, car age, features, ect) at the same level, the square root of the final price would be highest for the SUV, and lowest for the estate, and the SUV would bid for a 33.5 higher of the square root of price than estate, sedan would bid for a 9.6 higher than estate, and other car type would bid for a 7.2 higher than estate. The SUV would be the most profitable car type and would gain the highest returns from SUV and the least from the estate.
+
+### Q2: How does mileage affect price, and does this vary with car age?
+
+As we have previously discovered in report 3 with the simple linear regression model that contains only mileage as the predicting variable and price as the response variable, the residual behavior did not meet the model assumption. Both the scatter plot of price vs mileage, and the diagnostic plots of the model points to heteroscedasticity with fanning out residual variance, and residuals deviate from normality. We attempted to fix these issues with square root transformation on both mileage and price, and the model improved.
+
+
+The final model is also based on the findings of our second research question in the last report. The coefficient of the transformed mileage variable is -0.093690. This means that square root mileage has a negative relationship with the square root price of the car, interpreted as one unit increase in squared rooted mileage of the car is equivalent to a 0.093690 decrease in the predicted value of the squared rooted price of the car. 
+
+
+The p-value of the coefficient of the square root of mileage is smaller than 2*10^(-16), which is statistically significant at p < 0.001. This suggests that the square root mileage predictor is significant in our final model of prediction of the squared root spruce of the auctioned car.
+
+### Q3:Comprehensive Analysis of Features 1 to 8 Impact on Car Price  
+
+The analysis highlights that features like feature_1, feature_2, feature_6, feature_7, and feature_8 are prominent, with feature_2 (79%) and feature_8 (54%) being especially significant. Feature_1 (55%) indicates a popular attribute, while feature_3 and feature_4 (20%) appear more specialized, likely limited to premium models. Feature_8 emerges as a key factor linked to higher prices, supported by its strong positive coefficient in the regression analysis.  
+
+The EDA visualizations provide insights into feature-price interactions. Convertibles, often associated with luxury models, show a wider price spread, potentially tied to features like feature_8. Mileage has the expected negative relationship with price, but this trend is linearized using square root transformations. Features like feature_1 and feature_6 are associated with lower mileage, further boosting prices, while feature_8 appears to retain value even in older cars.  
+
+Regression analysis reinforces the importance of features 1 to 8. Feature_1 ($\beta$ = 4.39) and feature_2 ($\beta$ = 2.08) show positive impacts, while feature_8 ($\beta$ = 6.83) is the most influential, likely representing a luxury characteristic. Feature_6 ($\beta$ = 3.82) also significantly contributes to higher prices. High-priced cars are often associated with features like feature_8, feature_6, and feature_1.  
+
+Feature_8 likely represents a luxury or performance-enhancing attribute, significantly driving car prices. Features 1 and 2 also play vital roles, appealing to a broad range of buyers. While feature_5 has the smallest impact, it still adds value in combination with other favorable factors like low mileage or newer age.  
+
+The analysis confirms that features like feature_8, feature_1, and feature_6 have a substantial impact on car prices, making them crucial attributes in buyer 
+
+
+## Prediction: 
+
+### Validation Dataset Description:   
+
+The validation dataset, consisting of 2,407 BMW entries, closely mirrors the training dataset in terms of key variables, such as mileage, car age, and car type. The average mileage in the validation set is 70,580 miles, which is similar to the training set's 71,120 miles. The average car age is also comparable, at 5.1 years in the validation set versus 5.0 years in the training set. Additionally, the distribution of car types, with SUVs and sedans representing 22% and 24%, respectively, is consistent across both datasets. These similarities ensure that the validation dataset is appropriate for evaluating our model's predictive performance.
+
+### Visualizations:   
+
+Visualizations: We evaluated the model's performance on the validation dataset using scatter plots and histograms. The scatter plot comparing predicted and actual square root-transformed prices shows a strong positive trend, with predicted values closely following the actual outcomes along the regression line (Figure D1). The histogram illustrates the residual distribution from the stepwise regression model, centered around zero, which suggests that the model’s predictions are largely unbiased. The nearly symmetrical, bell-shaped distribution indicates that most prediction errors are minor, though a few outliers suggest occasional larger discrepancies (Figure D2).
+
+### Predictive Performance Statistics:   
+
+The stepwise regression model yielded strong performance metrics on the validation dataset. The Mean Absolute Error (MAE) was 9.14, signifying the average absolute difference between the predicted and actual square root-transformed prices. The Root Mean Squared Error (RMSE) was 15.08, reflecting the typical magnitude of prediction errors, and the R-squared value was 0.792, indicating that the model explained 79.2% of the variance in the square root-transformed prices. These results demonstrate the model's robust predictive capabilities while also pointing to opportunities for refinement, particularly in handling outliers and extreme values.
+
+## Discussion:
+
+Our analysis of BMW auction prices highlights the significant impact of various predictors, including mileage, car type, engine power, and key features, on car valuation. We utilized both linear regression and stepwise model refinement to ensure robust predictions and insights. The model’s performance, as evaluated on the validation dataset, demonstrated strong predictive power, with the stepwise regression model achieving an R-squared value of 0.792 and a Root Mean Squared Error (RMSE) of 15.08.
+
+Key findings include the clear influence of car type, with SUVs consistently commanding higher prices compared to other types, and the critical role of mileage, which negatively correlates with price even after transformation. The square root transformations of both mileage and price improved model reliability by addressing skewed distributions. Features like feature_8, associated with luxury or performance, emerged as important determinants of car price, reflecting consumer preferences for high-end attributes.
+
+While our models explained a substantial portion of price variation, some limitations persist, such as the potential effects of unobserved variables or external market conditions that our analysis did not capture. Future work could explore more sophisticated modeling approaches or incorporate additional data, such as market demand fluctuations or regional economic factors, to further enhance predictive accuracy.
+
+## Author Contribution Statement:  
+**Ananya Agarwal:** Conception and design, Visualization, Interpreting results, Writing (original draft), Writing (review and editing)  
+**Sumanth Hosdurg Kamath:** Formal analysis (coding), Visualization, Interpreting results, Writing (original draft), Writing (review and editing)  
+**Sangwoo (Mark) Kim:** Interpreting results, Writing (original draft)  
+**Thi Phuong Thao Vu:** Conception and design, Formal analysis (coding), Visualization, Writing (original draft), Writing (review and editing), Project Coordination  
+**Zhanbo Yang:** Interpreting results, Writing (original draft), Writing (review and editing)  
+**Runqi Zhao:** Conception and design, Formal analysis (coding), Visualization, Interpreting results, Writing (original draft), Writing (review and editing)  
+
+
+# Appendix
+
+## Step 1 Load Data and Cleaning
+```{r}
+bmw_data <- read.csv("BMWpricing_updated.csv") %>%
+  filter(mileage >= 0 & mileage < 1000000 & 
+           # price <= 120000 &
+           engine_power > 0) %>% 
+  mutate(Car_Age = time_length(mdy(sold_at) - 
+                                        mdy(registration_date),
+                               "year")) %>% 
+  select(-c("registration_date", "sold_at")) %>% 
+  select(c("mileage", "engine_power", "fuel", 
+           "paint_color", "car_type", "Car_Age", 
+           "feature_1", "feature_2", "feature_3", 
+           "feature_4", "feature_5", "feature_6", 
+           "feature_7", "feature_8", "obs_type", "price", "model_key"))
+
+bmw_data$price_sqrt <- sqrt(bmw_data$price)
+bmw_data$mileage_sqrt <- sqrt(bmw_data$mileage)
+
+# Calculate frequencies of model_key and car type
+model_key_frequency <- table(bmw_data$model_key)
+car_type_frequency <- table(bmw_data$car_type)
+
+# Create a list of model_keys with frequency > 100, car type  1000
+frequent_model_keys <- names(model_key_frequency[model_key_frequency > 100])
+frequent_car_type <- names(car_type_frequency[car_type_frequency > 1000])
+
+# Create new columns for model key and car type
+bmw_data <- bmw_data %>% mutate(
+  model_key_categorized = ifelse(bmw_data$model_key %in% frequent_model_keys, 
+                                        as.character(bmw_data$model_key), 
+                                        "other models"),
+  car_type_reduced = ifelse(bmw_data$car_type %in% frequent_car_type, 
+                                        bmw_data$car_type, "other car types")
+)
+```
+### Table A1
+
+```{r}
+library(gtsummary)
+bmw_data %>% select(-c("model_key", "car_type")) %>% tbl_summary(by = obs_type) %>% as_kable()
+```
+
+## Step 2 Seperate Dataset
+
+### Table A1 comapre between Train data and Validation data
+
+```{r training}
+Training <- filter(bmw_data, obs_type == "Training")
+Validation <- filter(bmw_data, obs_type == "Validation")
+bmw_data %>% select(-c("model_key", "car_type")) %>% 
+  tbl_summary(by = obs_type, 
+              statistic = list(all_continuous() ~ "{mean} ({sd})")) %>% 
+  add_p() %>% 
+  as_kable()
+```
+
+## Training Dataset
+
+### EDA - Visualization Figure A1-5
+
+```{r}
+# Table
+# Training %>% tbl_summary()
+
+# Visualization
+library(ggplot2)
+
+# Car Type
+Figure1 <- ggplot(Training, aes(x = car_type_reduced, y = price_sqrt, color = car_type)) +
+  ggforce::geom_sina(size = 0.8) +
+  labs(title = "Figure A1 Price (Square Root) by Car Type", x = "Car Type", y = "Price (Square Root)") +
+  theme(legend.position = "none", 
+        plot.title = element_text(size = 16),
+        axis.text = element_text(size = 14),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
+Figure1
+
+# Mileage
+Figure2A <- ggplot(Training, aes(x = mileage, y = price)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure A2 Scatter Plot of Price vs Mileage",
+       x = "Mileage",
+       y = "Price") +
+  theme_minimal()
+Figure2A
+
+Figure2B <- ggplot(Training, aes(x = mileage_sqrt, y = price_sqrt)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure A2 Scatter Plot of Price (Square Root) vs Mileage (Square Root)",
+       x = "Mileage (Square Root)",
+       y = "Price (Square Root)") +
+  theme_minimal()
+Figure2B
+
+
+# Car Age
+Figure3 <- ggplot(Training, aes(x = Car_Age, y = price_sqrt)) +
+  geom_point(color = "red") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure A3 Scatter Plot of Price (Square Root) vs Car_Age",
+       x = "Car Age, yrs",
+       y = "Price (Square Root)") +
+  theme_minimal()
+Figure3
+
+# Features
+Figure4 <- Training %>%
+  select(starts_with("feature")) %>%
+  gather(key = "Feature", value = "Presence") %>%
+  ggplot(aes(x = Feature, fill = factor(Presence))) +
+  geom_bar(position = "stack") +
+  labs(title = "Figure A4 Distribution of Car Features", x = "Feature", y = "Count", fill = "Presence")
+Figure4
+
+# Engine Power
+Figure5 <- ggplot(Training, aes(x = engine_power, y = price_sqrt)) +
+  geom_point(color = "yellow") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure A5 Scatter Plot of Price (Square Root) vs Engine power",
+       x = "Engine power",
+       y = "Price (Square Root)") +
+  theme_minimal()
+Figure5
+
+# Combine
+# grid.arrange(Figure1, Figure2A, Figure2B, Figure3, Figure4, Figure5, nrow = 3)
+```
+
+
+### Full Model
+
+```{r}
+Training_Full_Model <- lm(price_sqrt ~ mileage_sqrt + Car_Age + car_type_reduced + 
+                            feature_1 + feature_2 + feature_3 + feature_4 +
+                            feature_5 + feature_6 + feature_7 + feature_8 + 
+                            engine_power + fuel + paint_color + model_key_categorized, 
+                          data = Training)
+# summary(Training_Full_Model)
+# 
+# # Set up plot layout
+# par(mfrow = c(2, 2))
+# plot(Training_Full_Model)
+```
+
+
+### Stepwise Model
+```{r}
+library(MLmetrics)
+
+Training_Stepwise_model <- lm(price_sqrt ~ mileage_sqrt + Car_Age + car_type_reduced + 
+                            feature_1 + feature_2 + feature_3 + feature_4 +
+                            feature_5 + feature_6 + feature_7 + feature_8 + 
+                            engine_power + fuel + paint_color + model_key_categorized, 
+                          data = Training)
+stepwise_model_Train <- step(Training_Stepwise_model, direction = "both")
+stepwise_model_Train
+```
+
+```{r}
+Training_Stepwise_model <- lm(price_sqrt ~ mileage_sqrt + Car_Age + car_type_reduced +
+                            feature_1 + feature_2 + feature_3 + feature_4 +
+                            feature_5 + feature_6 + feature_7 + feature_8 +
+                            engine_power + fuel + model_key_categorized,
+                          data = Training)
+
+summary(Training_Stepwise_model)
+```
+
+
+### Figure B Diagnose of Stepwise model
+
+```{r}
+# Set up plot layout
+# par(mfrow = c(2, 2))
+plot(Training_Stepwise_model)
+```
+
+### Variance Inflation factors of Stepwise training Model 
+```{r}
+library(car)
+library(MLmetrics)
+vif(Training_Stepwise_model)
+```
+
+### Lasso Regression
+
+```{r}
+library(glmnet)
+library(nlme)
+lasso_model <- glmnet(x = model.matrix(Training_Full_Model)[,-1],
+                      y = Training$price_sqrt,
+                      alpha = 1)
+plot(lasso_model, xvar = "lambda", label = TRUE)
+write.csv(data.frame(Df = lasso_model$df, Dev_pct = lasso_model$dev.ratio*100, Lambda = lasso_model$lambda), "lasso_model.csv", row.names = F)
+
+
+cv_model <- cv.glmnet(x = model.matrix(Training_Full_Model)[,-1],
+                      y = Training$price_sqrt,
+                      alpha = 1)
+best_lambda <- cv_model$lambda.min
+cat("Best Lambda - LASSO:", best_lambda)
+lasso_coef <- coef(lasso_model, s = best_lambda)
+# Summarize the LASSO model
+print(lasso_coef)
+```
+
+## Validation
+
+### EDA - Visualization
+
+```{r}
+# Table
+# Validation %>% tbl_summary()
+
+# Visualization
+# Car Type
+Figure1 <- ggplot(Validation, aes(x = car_type_reduced, y = price_sqrt, color = car_type)) +
+  ggforce::geom_sina(size = 0.8) +
+  labs(title = "Figure C1 Price (Square Root) by Car Type", x = "Car Type", y = "Price (Square Root)") +
+  theme(legend.position = "none", 
+        plot.title = element_text(size = 16),
+        axis.text = element_text(size = 14),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
+Figure1
+
+# Mileage
+Figure2A <- ggplot(Validation, aes(x = mileage, y = price)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure C2 Scatter Plot of Price vs Mileage",
+       x = "Mileage",
+       y = "Price") +
+  theme_minimal()
+Figure2A
+
+Figure2B <- ggplot(Validation, aes(x = mileage_sqrt, y = price_sqrt)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure C2 Scatter Plot of Price (Square Root) vs Mileage (Square Root)",
+       x = "Mileage (Square Root)",
+       y = "Price (Square Root)") +
+  theme_minimal()
+Figure2B
+
+# Car Age
+Figure3 <- ggplot(Validation, aes(x = Car_Age, y = price_sqrt)) +
+  geom_point(color = "red") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure C3 Scatter Plot of Price (Square Root) vs Car_Age",
+       x = "Car Age, yrs",
+       y = "Price (Square Root)") +
+  theme_minimal()
+Figure3
+
+# Features
+Figure4 <- Validation %>%
+  select(starts_with("feature")) %>%
+  gather(key = "Feature", value = "Presence") %>%
+  ggplot(aes(x = Feature, fill = factor(Presence))) +
+  geom_bar(position = "stack") +
+  labs(title = "Figure C4 Distribution of Car Features", x = "Feature", y = "Count", fill = "Presence")
+Figure4
+
+# Engine Power
+Figure5 <- ggplot(Validation, aes(x = engine_power, y = price_sqrt)) +
+  geom_point(color = "yellow") +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure C5 Scatter Plot of Price (Square Root) vs Engine power",
+       x = "Engine power",
+       y = "Price (Square Root)") +
+  theme_minimal()
+Figure5
+
+# Combine
+# grid.arrange(Figure1, Figure2A, Figure2B, Figure3, Figure4, Figure5, nrow = 3)
+```
+
+
+### Full Model - Prediction on Validation Dataset
+```{r}
+# Validation$Predicted_Price_Sqrt_Full <- predict(Training_Full_Model, newdata = Validation)
+# Validation$Pred_Full_Original <- Validation$Predicted_Price_Sqrt_Full - Validation$price_sqrt
+# 
+# ggplot(Validation, aes(x = price_sqrt, y = Predicted_Price_Sqrt_Full)) +
+#   geom_point() +
+#   geom_smooth(method = "lm") + 
+#   labs(title = "Scatter Plot of Price (Square Root) vs Predicted Price (Square Root)",
+#        x = "Price (Square Root)",
+#        y = "Predicted Price (Square Root)")
+# 
+# ggplot(Validation, aes(x = Pred_Full_Original)) +
+#   geom_histogram() + 
+#   labs(title = "Histogram of difference between Predicted Price (Square Root) to Price (Square Root) ")
+# 
+# # Calculate performance metrics: MAE, RMSE, and R-squared
+# mae <- mean(abs(Validation$Predicted_Price_Sqrt_Full - Validation$price_sqrt))
+# rmse <- sqrt(mean((Validation$Predicted_Price_Sqrt_Full - Validation$price_sqrt)^2))
+# 
+# # Calculate R-squared
+# rss <- sum((Validation$Predicted_Price_Sqrt_Full - Validation$price_sqrt)^2)  # Residual sum of squares
+# tss <- sum((Validation$price_sqrt - mean(Validation$price_sqrt))^2)       # Total sum of squares
+# rsq <- 1 - (rss / tss)  # R-squared
+# 
+# # Print performance metrics
+# cat("Validation Set Performance Metrics for Full Model:\n")
+# cat("Mean Absolute Error (MAE):", mae, "\n")
+# cat("Root Mean Squared Error (RMSE):", rmse, "\n")
+# cat("R-squared (R²):", rsq, "\n")
+```
+
+
+### Stepwise Model - Prediction on Validation Dataset
+```{r}
+Validation$Predicted_Price_Sqrt_Stepwise1 <- predict(Training_Stepwise_model, newdata = Validation)
+
+Validation$Pred_Stepwise1_Original <- Validation$Predicted_Price_Sqrt_Stepwise1 - Validation$price_sqrt
+```
+
+```{r}
+ggplot(Validation, aes(x = price_sqrt, y = Validation$Predicted_Price_Sqrt_Stepwise1)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  labs(title = "Figure D1 Scatter Plot of Price (Square Root) vs Predicted Price (Square Root)",
+       x = "Price (Square Root)",
+       y = "Predicted Price (Square Root)")
+
+ggplot(Validation, aes(x = Pred_Stepwise1_Original)) +
+  geom_histogram()  + 
+  labs(title = "Figure D2 Histogram of difference between Predicted Price (Square Root) to Price (Square Root) ")
+
+# Calculate performance metrics: MAE, RMSE, and R-squared
+mae <- mean(abs(Validation$Predicted_Price_Sqrt_Stepwise1 - Validation$price_sqrt))
+rmse <- sqrt(mean((Validation$Predicted_Price_Sqrt_Stepwise1 - Validation$price_sqrt)^2))
+
+# Calculate R-squared
+rss <- sum((Validation$Predicted_Price_Sqrt_Stepwise1 - Validation$price_sqrt)^2)  # Residual sum of squares
+tss <- sum((Validation$price_sqrt - mean(Validation$price_sqrt))^2)       # Total sum of squares
+rsq <- 1 - (rss / tss)  # R-squared
+
+# Print performance metrics
+cat("Validation Set Performance Metrics for Stepwise Model:\n")
+cat("Mean Absolute Error (MAE):", mae, "\n")
+cat("Root Mean Squared Error (RMSE):", rmse, "\n")
+cat("R-squared (R²):", rsq, "\n")
+```
+
